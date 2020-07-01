@@ -6,7 +6,7 @@
 
     <groupId>dev.magicmq</groupId>
     <artifactId>rappu</artifactId>
-    <version>1.3-SNAPSHOT</version>
+    <version>1.4-SNAPSHOT</version>
 
     <repositories>
         <repository>

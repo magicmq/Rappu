@@ -120,7 +120,18 @@ public class Database {
         Bukkit.getScheduler().runTaskAsynchronously(using, () -> {
             try {
                 ResultSet result = query(sql, toSet);
-                Bukkit.getScheduler().runTask(using, () -> callback.callback(result));
+                Bukkit.getScheduler().runTask(using, () -> {
+                    try {
+                        callback.callback(result);
+                    } catch (SQLException e) {
+                        using.getLogger().log(Level.SEVERE, "There was an error while reading the query result!");
+                        e.printStackTrace();
+                    } finally {
+                        try {
+                            result.close();
+                        } catch (SQLException ignored) {}
+                    }
+                });
             } catch (SQLException e) {
                 using.getLogger().log(Level.SEVERE, "There was an error when querying the database!");
                 e.printStackTrace();
@@ -143,7 +154,11 @@ public class Database {
         Bukkit.getScheduler().runTaskAsynchronously(using, () -> {
             try {
                 int toReturn = update(sql, toSet);
-                Bukkit.getScheduler().runTask(using, () -> callback.callback(toReturn));
+                Bukkit.getScheduler().runTask(using, () -> {
+                    try {
+                        callback.callback(toReturn);
+                    } catch (SQLException ignored) {}
+                });
             } catch (SQLException e) {
                 using.getLogger().log(Level.SEVERE, "There was an error when updating the database!");
                 e.printStackTrace();
