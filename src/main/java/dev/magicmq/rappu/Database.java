@@ -30,7 +30,11 @@ public class Database {
     }
 
     public Database withConnectionInfo(String host, int port, String database) {
-        config.setJdbcUrl(String.format("jdbc:mysql://%s:%d/%s?useSSL=false",
+        return withConnectionInfo(host, port, database, true);
+    }
+
+    public Database withConnectionInfo(String host, int port, String database, boolean useSSL) {
+        config.setJdbcUrl(String.format(useSSL ? "jdbc:mysql://%s:%d/%s" : "jdbc:mysql://%s:%d/%s?useSSL=false",
                 host,
                 port,
                 database));
