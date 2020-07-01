@@ -20,6 +20,7 @@ public class Database {
     private HikariConfig config;
     private HikariDataSource source;
     private JavaPlugin using;
+    private boolean debugLoggingEnabled;
 
     public Database() {
         config = new HikariConfig();
@@ -75,8 +76,18 @@ public class Database {
         return this;
     }
 
+    public Database withDebugLogging() {
+        this.debugLoggingEnabled = true;
+        return this;
+    }
+
     public Database open() {
         source = new HikariDataSource(config);
+        debug("Successfully created a HikariDataSource with the following info: \n"
+                    + "Jdbc URL: " + config.getJdbcUrl() + "\n"
+                    + "Username: " + config.getUsername() + "\n"
+                    + "Password: " + config.getPassword() + "\n"
+                    + "Properties: " + config.getDataSourceProperties());
         return this;
     }
 
@@ -91,12 +102,15 @@ public class Database {
     public int createTableFromFile(String file, Class<?> mainClass) throws IOException, SQLException {
         URL resource = Resources.getResource(mainClass, "/" + file);
         String databaseStructure = Resources.toString(resource, Charsets.UTF_8);
+        debug("(Create Table) Successfully loaded an SQL statement from the " + file + " file.");
         return createTableFromStatement(databaseStructure);
     }
 
     public int createTableFromStatement(String sql) throws SQLException {
         try (Connection connection = source.getConnection()) {
+            debug("(Create Table) Successfully got a new connection from hikari: " + connection.toString() + ", catalog: " + connection.getCatalog());
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                debug("(Create Table) Successfully created a PreparedStatement. Executing the following: " + sql);
                 return statement.executeUpdate();
             }
         }
@@ -104,12 +118,15 @@ public class Database {
 
     public ResultSet query(String sql, Object[] toSet) throws SQLException {
         try (Connection connection = source.getConnection()) {
+            debug("(Query) Successfully got a new connection from hikari: " + connection.toString() + ", catalog: " + connection.getCatalog());
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                debug("(Query) Successfully created a PreparedStatement with the following: " + sql);
                 if (toSet != null) {
                     for (int i = 0; i < toSet.length; i++) {
                         statement.setObject(i + 1, toSet[i]);
                     }
                 }
+                debug("(Query) Successfully set objects. Executing the following: " + statement.toString().substring(statement.toString().indexOf('-') + 1));
                 ResultSet result = statement.executeQuery();
                 return result;
             }
@@ -141,10 +158,13 @@ public class Database {
 
     public int update(String sql, Object[] toSet) throws SQLException {
         try (Connection connection = source.getConnection()) {
+            debug("(Update) Successfully got a new connection from hikari: " + connection.toString() + ", catalog: " + connection.getCatalog());
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                debug("(Update) Successfully created a PreparedStatement with the following: " + sql);
                 for (int i = 0; i < toSet.length; i++) {
                     statement.setObject(i + 1, toSet[i]);
                 }
+                debug("(Update) Successfully set objects. Executing the following: " + statement.toString().substring(statement.toString().indexOf('-') + 1));
                 return statement.executeUpdate();
             }
         }
@@ -164,5 +184,10 @@ public class Database {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void debug(String message) {
+        if (debugLoggingEnabled)
+            using.getLogger().log(Level.INFO, "[Rappu] Debug - " + message);
     }
 }
