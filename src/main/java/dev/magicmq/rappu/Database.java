@@ -6,6 +6,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
@@ -13,13 +15,13 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.logging.Level;
 
 public class Database {
 
     private HikariConfig config;
     private HikariDataSource source;
     private JavaPlugin using;
+    private Logger logger;
     private boolean debugLoggingEnabled;
 
     public Database() {
@@ -82,6 +84,7 @@ public class Database {
     }
 
     public Database open() {
+        logger = LoggerFactory.getLogger(using.getName() + " - Rappu");
         source = new HikariDataSource(config);
         debug("Successfully created a HikariDataSource with the following info: \n"
                     + "Jdbc URL: " + config.getJdbcUrl() + "\n"
@@ -141,7 +144,7 @@ public class Database {
                     try {
                         callback.callback(result);
                     } catch (SQLException e) {
-                        using.getLogger().log(Level.SEVERE, "There was an error while reading the query result!");
+                        logger.error("There was an error while reading the query result!");
                         e.printStackTrace();
                     } finally {
                         try {
@@ -150,7 +153,7 @@ public class Database {
                     }
                 });
             } catch (SQLException e) {
-                using.getLogger().log(Level.SEVERE, "There was an error when querying the database!");
+                logger.error("There was an error when querying the database!");
                 e.printStackTrace();
             }
         });
@@ -180,7 +183,7 @@ public class Database {
                     } catch (SQLException ignored) {}
                 });
             } catch (SQLException e) {
-                using.getLogger().log(Level.SEVERE, "There was an error when updating the database!");
+                logger.error("There was an error when updating the database!");
                 e.printStackTrace();
             }
         });
@@ -188,6 +191,6 @@ public class Database {
 
     private void debug(String message) {
         if (debugLoggingEnabled)
-            using.getLogger().log(Level.INFO, "[Rappu] Debug - " + message);
+            logger.info(message);
     }
 }
