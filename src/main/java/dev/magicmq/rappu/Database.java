@@ -24,7 +24,7 @@ public class Database {
     private Logger logger;
     private boolean debugLoggingEnabled;
 
-    public Database() {
+    private Database() {
         config = new HikariConfig();
     }
 
