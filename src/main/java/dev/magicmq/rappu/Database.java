@@ -15,6 +15,9 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Database {
 
@@ -22,10 +25,17 @@ public class Database {
     private HikariDataSource source;
     private JavaPlugin using;
     private Logger logger;
+    private int numOfThreads;
+    private long maxBlockTime;
     private boolean debugLoggingEnabled;
+
+    private ThreadPoolExecutor asyncQueue;
+    private boolean shuttingDown;
 
     public Database() {
         config = new HikariConfig();
+        numOfThreads = 5;
+        maxBlockTime = 15000L;
     }
 
     public static Database newDatabase() {
@@ -78,6 +88,16 @@ public class Database {
         return this;
     }
 
+    public Database withNumOfThreads(int numOfThreads) {
+        this.numOfThreads = numOfThreads;
+        return this;
+    }
+
+    public Database withMaxBlockTime(long maxBlockTime) {
+        this.maxBlockTime = maxBlockTime;
+        return this;
+    }
+
     public Database withDebugLogging() {
         this.debugLoggingEnabled = true;
         return this;
@@ -91,10 +111,19 @@ public class Database {
                     + "Username: " + config.getUsername() + "\n"
                     + "Password: " + config.getPassword() + "\n"
                     + "Properties: " + config.getDataSourceProperties());
+        asyncQueue = (ThreadPoolExecutor) Executors.newFixedThreadPool(numOfThreads);
         return this;
     }
 
     public void close() {
+        shuttingDown = true;
+        asyncQueue.shutdown();
+        try {
+            asyncQueue.awaitTermination(maxBlockTime, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            logger.error("Thread was interrupted while waiting for SQL statements to finish executing!");
+            e.printStackTrace();
+        }
         source.close();
     }
 
@@ -137,21 +166,28 @@ public class Database {
     }
 
     public void queryAsync(String sql, Object[] toSet, Callback<ResultSet> callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(using, () -> {
+        asyncQueue.execute(() -> {
             try {
                 ResultSet result = query(sql, toSet);
-                Bukkit.getScheduler().runTask(using, () -> {
-                    try {
-                        callback.callback(result);
-                    } catch (SQLException e) {
-                        logger.error("There was an error while reading the query result!");
-                        e.printStackTrace();
-                    } finally {
+                if (!shuttingDown) {
+                    Bukkit.getScheduler().runTask(using, () -> {
                         try {
-                            result.close();
-                        } catch (SQLException ignored) {}
-                    }
-                });
+                            callback.callback(result);
+                        } catch (SQLException e) {
+                            logger.error("There was an error while reading the query result!");
+                            e.printStackTrace();
+                        } finally {
+                            try {
+                                result.close();
+                            } catch (SQLException ignored) {}
+                        }
+                    });
+                } else {
+                    try {
+                        logger.error("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run.");
+                        result.close();
+                    } catch (SQLException ignored) {}
+                }
             } catch (SQLException e) {
                 logger.error("There was an error when querying the database!");
                 e.printStackTrace();
@@ -174,14 +210,18 @@ public class Database {
     }
 
     public void updateAsync(String sql, Object[] toSet, Callback<Integer> callback) {
-        Bukkit.getScheduler().runTaskAsynchronously(using, () -> {
+        asyncQueue.execute(() -> {
             try {
                 int toReturn = update(sql, toSet);
-                Bukkit.getScheduler().runTask(using, () -> {
-                    try {
-                        callback.callback(toReturn);
-                    } catch (SQLException ignored) {}
-                });
+                if (!shuttingDown) {
+                    Bukkit.getScheduler().runTask(using, () -> {
+                        try {
+                            callback.callback(toReturn);
+                        } catch (SQLException ignored) {}
+                    });
+                } else {
+                    logger.error("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run.");
+                }
             } catch (SQLException e) {
                 logger.error("There was an error when updating the database!");
                 e.printStackTrace();
