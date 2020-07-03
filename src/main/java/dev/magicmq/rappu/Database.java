@@ -85,6 +85,7 @@ public class Database {
 
     public Database open() {
         logger = LoggerFactory.getLogger(using.getName() + " - Rappu");
+        config.setPoolName(using.getName().toLowerCase() + "-rappu-hikari");
         source = new HikariDataSource(config);
         debug("Successfully created a HikariDataSource with the following info: \n"
                     + "Jdbc URL: " + config.getJdbcUrl() + "\n"
