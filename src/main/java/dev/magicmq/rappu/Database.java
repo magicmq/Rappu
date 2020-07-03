@@ -94,6 +94,12 @@ public class Database {
         return this;
     }
 
+    public HikariDataSource getDataSource() {
+        if (source == null)
+            throw new IllegalArgumentException("The data source has not been instantiated! The database must be opened first.");
+        return source;
+    }
+
     public void close() {
         source.close();
     }
