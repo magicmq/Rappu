@@ -1,12 +1,12 @@
-#Rappu
+# Rappu
 Rappu is a lightweight wrapper for [HikariCP](https://github.com/brettwooldridge/HikariCP), designed to be used with Bukkit/Spigot plugins. Rappu greatly simplfiies the usage of MySQL in your plugins by removing a large amount of boilerplate code (such as creating Connections, PreparedStatements, handling exceptions, and running queries/updates asynchronously with a synchronous callback). Rappu was designed and written with ease of use and flexbility in mind, so it caters to both beginners looking to branch out into database storage as well as experienced evelopers looking for a simpler and cleaner way to work with MySQL. 
 
-##Features
+## Features
 
-###Creation and management of a HikariConfig and HikariDataSource internally
+### Creation and management of a HikariConfig and HikariDataSource internally
 Rappu handles all interaction with hikari internally, so working with MySQL is greatly simplified. Only a few methods need to be called to open up a connection pool. Included is a `Database#withDefaultProperties` method, so that all the recommended hikari properties can be automatically applied. No need to remember them every time you need to work with hikari! 
 
-###Internal handling of boilerplate code
+### Internal handling of boilerplate code
 Rappu takes care of creating connections, PreparedStatements, exception handling, and querying/updating asynchronous code for you, so that your own code is as clean as possible. Rappu allows you to take code like this:
 ``` java
 public void insert(final String uuid) {
@@ -68,22 +68,22 @@ public void insert(final String uuid) {
 }
 ```
 
-###Asynchronous Queries/Updates with Synchronous Callbacks
+### Asynchronous Queries/Updates with Synchronous Callbacks
 Rappu includes support for querying and updating asynchronously. A callback is provided for asynchronous queries/updates called synchronously such that results of queries/updates can be dealt with in a thread-safe manner.
 
-###Usage of a ThreadPoolExecutor for Asynchronous Execution
+### Usage of a ThreadPoolExecutor for Asynchronous Execution
 Rappu utilizes Java's [ThreadPoolExecutor](https://docs.oracle.com/javase/8/docs/api/java/util/concurrent/ThreadPoolExecutor.html) class, which works as an executor service to provide multiple threads to run submitted tasks asynchronously. Using a thread pool to execute SQL statements asynchronously provides many benefits, including:
 - Much less overhead than when utilizing Bukkit's scheduling system to schedule/run asynchronous tasks. This confers a significant performance benefit.
 - Improved performance when executing large numbers of SQL statements simultaneously due to reduced per-task invocation overhead
 - Cleaner and safer handling of reloads, server shutdowns. Should the server shutdown or reload when SQL statements are pending/undergoing execution, Rappu will pause shutdown and wait until all pending/current SQL statements have finished execution. This protects against data loss and rollbacks.
 - No hang on an unresponsive database. If the remote database becomes unresponsive for whatever reason, thread(s) will wait until the database becomes responsive again in the background without disturbing the server or other pending SQL statements.
 
-###Simple but Feature-Rich API
+### Simple but Feature-Rich API
 Rappu was designed with simplicity in mind, and only takes a few method calls to work. Rappu is no less robust, however, and it contains several features to make almost anything possible. Check out the wiki or Javadocs for information on the API.
 
-##Using Rappu as a Dependency
+## Using Rappu as a Dependency
 
-###Maven
+### Maven
 Add the following repository:
 ``` maven
 <repositories>
@@ -103,7 +103,7 @@ Then, add the following dependency:
 ```
 Replace `{VERSION}` with the version that JitPack shows above.
 
-###Gradle
+### Gradle
 Add the following repository:
 ``` groovy
 repositories {
