@@ -32,7 +32,7 @@ public class Database {
     private ThreadPoolExecutor asyncQueue;
     private boolean shuttingDown;
 
-    public Database() {
+    private Database() {
         config = new HikariConfig();
         numOfThreads = 5;
         maxBlockTime = 15000L;
@@ -105,6 +105,7 @@ public class Database {
 
     public Database open() {
         logger = LoggerFactory.getLogger(using.getName() + " - Rappu");
+        config.setPoolName(using.getName().toLowerCase() + "-rappu-hikari");
         source = new HikariDataSource(config);
         debug("Successfully created a HikariDataSource with the following info: \n"
                     + "Jdbc URL: " + config.getJdbcUrl() + "\n"
@@ -113,6 +114,12 @@ public class Database {
                     + "Properties: " + config.getDataSourceProperties());
         asyncQueue = (ThreadPoolExecutor) Executors.newFixedThreadPool(numOfThreads);
         return this;
+    }
+
+    public HikariDataSource getDataSource() {
+        if (source == null)
+            throw new IllegalArgumentException("The data source has not been instantiated! The database must be opened first.");
+        return source;
     }
 
     public void close() {
