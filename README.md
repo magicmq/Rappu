@@ -1,4 +1,9 @@
+
+[![Generic badge](https://img.shields.io/badge/version-1.4.4-C.svg)](https://repo.magicmq.dev/repository/archetypes/)
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/f730c7825efa43bdae2326d87da0f920)](https://www.codacy.com/manual/magicmq/Rappu?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magicmq/Rappu&amp;utm_campaign=Badge_Grade)
+
 # Rappu
+
 Rappu is a lightweight wrapper for [HikariCP](https://github.com/brettwooldridge/HikariCP), designed to be used with Bukkit/Spigot plugins. Rappu greatly simplfiies the usage of MySQL in your plugins by removing a large amount of boilerplate code (such as creating Connections, PreparedStatements, handling exceptions, and running queries/updates asynchronously with a synchronous callback). Rappu was designed and written with ease of use and flexbility in mind, so it caters to both beginners looking to branch out into database storage as well as experienced evelopers looking for a simpler and cleaner way to work with MySQL. 
 
 ## Features
