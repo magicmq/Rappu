@@ -1,6 +1,7 @@
 
 [![Generic badge](https://img.shields.io/badge/version-1.6-C.svg)](https://repo.magicmq.dev/repository/archetypes/)
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/f730c7825efa43bdae2326d87da0f920)](https://www.codacy.com/manual/magicmq/Rappu?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=magicmq/Rappu&amp;utm_campaign=Badge_Grade)
+[![Apache license](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
 # Rappu
 
