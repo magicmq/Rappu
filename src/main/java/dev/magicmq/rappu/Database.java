@@ -84,6 +84,8 @@ public class Database {
     }
 
     public Database open() {
+        if (using == null)
+            throw new IllegalStateException("Cannot open the Database without a plugin using! Did you call Database#withPluginUsing?");
         logger = LoggerFactory.getLogger(using.getName() + " - Rappu");
         config.setPoolName(using.getName().toLowerCase() + "-rappu-hikari");
         source = new HikariDataSource(config);
@@ -161,6 +163,7 @@ public class Database {
                 });
             } catch (SQLException e) {
                 logger.error("There was an error when querying the database!");
+                logger.error("Error occurred on the following SQL statement: " + sql);
                 e.printStackTrace();
             }
         });
@@ -191,6 +194,7 @@ public class Database {
                 });
             } catch (SQLException e) {
                 logger.error("There was an error when updating the database!");
+                logger.error("Error occurred on the following SQL statement: " + sql);
                 e.printStackTrace();
             }
         });
