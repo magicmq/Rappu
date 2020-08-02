@@ -15,9 +15,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 
 public class Database {
 
@@ -177,21 +175,26 @@ public class Database {
             try {
                 ResultSet result = query(sql, toSet);
                 if (!shuttingDown) {
-                    Bukkit.getScheduler().runTask(using, () -> {
+                    RunnableFuture<Void> task = new FutureTask<>(() -> {
                         try {
                             callback.callback(result);
                         } catch (SQLException e) {
                             logger.error("There was an error while reading the query result!");
                             e.printStackTrace();
-                        } finally {
-                            try {
-                                result.close();
-                            } catch (SQLException ignored) {}
                         }
+                        return null;
                     });
+                    Bukkit.getScheduler().runTask(using, task);
+                    try {
+                        task.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error("There was an error while waiting for the query to complete!");
+                        e.printStackTrace();
+                    }
+                    result.close();
                 } else {
                     try {
-                        logger.error("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run.");
+                        logger.warn("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run. This occurred on a query, so data will not be loaded.");
                         result.close();
                     } catch (SQLException ignored) {}
                 }
@@ -221,13 +224,21 @@ public class Database {
             try {
                 int toReturn = update(sql, toSet);
                 if (!shuttingDown) {
-                    Bukkit.getScheduler().runTask(using, () -> {
+                    RunnableFuture<Void> task = new FutureTask<>(() -> {
                         try {
                             callback.callback(toReturn);
                         } catch (SQLException ignored) {}
+                        return null;
                     });
+                    Bukkit.getScheduler().runTask(using, task);
+                    try {
+                        task.get();
+                    } catch (InterruptedException | ExecutionException e) {
+                        logger.error("There was an error while waiting for the update to complete!");
+                        e.printStackTrace();
+                    }
                 } else {
-                    logger.error("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run.");
+                    logger.warn("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run. This occurred during an update, so no data loss has occurred.");
                 }
             } catch (SQLException e) {
                 logger.error("There was an error when updating the database!");
