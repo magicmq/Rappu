@@ -172,31 +172,44 @@ public class Database {
 
     public void queryAsync(String sql, Object[] toSet, Callback<ResultSet> callback) {
         asyncQueue.execute(() -> {
-            try {
-                ResultSet result = query(sql, toSet);
-                if (!shuttingDown) {
-                    RunnableFuture<Void> task = new FutureTask<>(() -> {
+            try (Connection connection = source.getConnection()) {
+                debug("(Query) Successfully got a new connection from hikari: " + connection.toString() + ", catalog: " + connection.getCatalog());
+                try (PreparedStatement statement = connection.prepareStatement(sql)) {
+                    debug("(Query) Successfully created a PreparedStatement with the following: " + sql);
+                    if (toSet != null) {
+                        for (int i = 0; i < toSet.length; i++) {
+                            statement.setObject(i + 1, toSet[i]);
+                        }
+                    }
+                    debug("(Query) Successfully set objects. Executing the following: " + statement.toString().substring(statement.toString().indexOf('-') + 1));
+                    ResultSet result = statement.executeQuery();
+                    if (!shuttingDown) {
+                        RunnableFuture<Void> task = new FutureTask<>(() -> {
+                            try {
+                                callback.callback(result);
+                            } catch (SQLException e) {
+                                logger.error("There was an error while reading the query result!");
+                                e.printStackTrace();
+                            }
+                            return null;
+                        });
+                        Bukkit.getScheduler().runTask(using, task);
                         try {
-                            callback.callback(result);
-                        } catch (SQLException e) {
-                            logger.error("There was an error while reading the query result!");
+                            task.get();
+                        } catch (InterruptedException | ExecutionException e) {
+                            logger.error("There was an error while waiting for the query to complete!");
                             e.printStackTrace();
                         }
-                        return null;
-                    });
-                    Bukkit.getScheduler().runTask(using, task);
-                    try {
-                        task.get();
-                    } catch (InterruptedException | ExecutionException e) {
-                        logger.error("There was an error while waiting for the query to complete!");
-                        e.printStackTrace();
-                    }
-                    result.close();
-                } else {
-                    try {
-                        logger.warn("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run. This occurred on a query, so data will not be loaded.");
                         result.close();
-                    } catch (SQLException ignored) {}
+                    } else {
+                        try {
+                            logger.warn("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run. This occurred on a query, so data will not be loaded.");
+                            result.close();
+                        } catch (SQLException ignored) {}
+                    }
+                } catch (SQLException e) {
+                    logger.error("There was an error when querying the database!");
+                    e.printStackTrace();
                 }
             } catch (SQLException e) {
                 logger.error("There was an error when querying the database!");
