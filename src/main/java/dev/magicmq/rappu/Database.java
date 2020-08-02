@@ -197,13 +197,13 @@ public class Database {
                         try {
                             task.get();
                         } catch (InterruptedException | ExecutionException e) {
-                            logger.error("There was an error while waiting for the query to complete!");
+                            logger.error("There was an error while waiting for the query callback to complete!");
                             e.printStackTrace();
                         }
                         result.close();
                     } else {
                         try {
-                            logger.warn("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run. This occurred on a query, so data will not be loaded.");
+                            logger.warn("SQL statement executed asynchronously during shutdown, so the synchronous callback was not run. This occurred during a query, so data will not be loaded.");
                             result.close();
                         } catch (SQLException ignored) {}
                     }
@@ -247,7 +247,7 @@ public class Database {
                     try {
                         task.get();
                     } catch (InterruptedException | ExecutionException e) {
-                        logger.error("There was an error while waiting for the update to complete!");
+                        logger.error("There was an error while waiting for the update callback to complete!");
                         e.printStackTrace();
                     }
                 } else {
