@@ -226,8 +226,10 @@ public class Database {
             debug("(Update) Successfully got a new connection from hikari: " + connection.toString() + ", catalog: " + connection.getCatalog());
             try (PreparedStatement statement = connection.prepareStatement(sql)) {
                 debug("(Update) Successfully created a PreparedStatement with the following: " + sql);
-                for (int i = 0; i < toSet.length; i++) {
-                    statement.setObject(i + 1, toSet[i]);
+                if (toSet != null) {
+                    for (int i = 0; i < toSet.length; i++) {
+                        statement.setObject(i + 1, toSet[i]);
+                    }
                 }
                 debug("(Update) Successfully set objects. Executing the following: " + statement.toString().substring(statement.toString().indexOf('-') + 1));
                 return statement.executeUpdate();
