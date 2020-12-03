@@ -6,12 +6,12 @@
 
     <groupId>dev.magicmq</groupId>
     <artifactId>rappu</artifactId>
-    <version>1.7-SNAPSHOT</version>
+    <version>1.8-SNAPSHOT</version>
 
     <repositories>
         <repository>
             <id>proxy-repos</id>
-            <url>https://repo.magicmq.dev/repository/proxy-repos</url>
+            <url>https://repo.magicmq.dev/repository/proxy-repos/</url>
         </repository>
     </repositories>
 
@@ -27,6 +27,11 @@
             <artifactId>spigot-api</artifactId>
             <version>1.12.2-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.md-5</groupId>
+            <artifactId>bungeecord-api</artifactId>
+            <version>1.12-SNAPSHOT</version>
         </dependency>
     </dependencies>
 

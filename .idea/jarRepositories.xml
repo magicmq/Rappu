@@ -9,6 +9,11 @@
     <remote-repository>
       <option name="id" value="proxy-repos" />
       <option name="name" value="proxy-repos" />
+      <option name="url" value="https://repo.magicmq.dev/repository/proxy-repos/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="proxy-repos" />
+      <option name="name" value="proxy-repos" />
       <option name="url" value="https://repo.magicmq.dev/repository/proxy-repos" />
     </remote-repository>
     <remote-repository>
@@ -20,6 +25,11 @@
       <option name="id" value="jboss.community" />
       <option name="name" value="JBoss Community repository" />
       <option name="url" value="https://repository.jboss.org/nexus/content/repositories/public/" />
+    </remote-repository>
+    <remote-repository>
+      <option name="id" value="bungee-repo" />
+      <option name="name" value="bungee-repo" />
+      <option name="url" value="https://oss.sonatype.org/content/groups/public/" />
     </remote-repository>
   </component>
 </project>
