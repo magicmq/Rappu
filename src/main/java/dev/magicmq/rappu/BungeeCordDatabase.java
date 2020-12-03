@@ -16,6 +16,8 @@ public class BungeeCordDatabase extends AbstractDatabase<Plugin> {
         return new BungeeCordDatabase();
     }
 
+    private BungeeCordDatabase() {}
+
     public BungeeCordDatabase open() {
         if (using == null)
             throw new IllegalStateException("Cannot open the Database without a plugin using! Did you call Database#withPluginUsing?");

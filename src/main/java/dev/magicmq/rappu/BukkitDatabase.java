@@ -17,6 +17,8 @@ public class BukkitDatabase extends AbstractDatabase<JavaPlugin> {
         return new BukkitDatabase();
     }
 
+    private BukkitDatabase() {}
+
     public BukkitDatabase open() {
         if (using == null)
             throw new IllegalStateException("Cannot open the Database without a plugin using! Did you call Database#withPluginUsing?");
